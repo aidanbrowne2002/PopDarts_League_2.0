@@ -1,0 +1,10 @@
+{% for notification in notifications %}
+<div class="alert alert-info" role="alert" id="notification-{{ notification.id }}">
+    <h4 class="alert-heading">{{ notification.title }} - <br> <small>{{ notification.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small></h4>
+    <p>{{ notification.content }}</p>
+    {% if notification.link %}
+        <p><a href="{{ notification.link }}" target="_blank">{{ notification.link_text }}</a></p>
+    {% endif %}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="dismissNotification({{ notification.id }})"></button>
+</div>
+{% endfor %}

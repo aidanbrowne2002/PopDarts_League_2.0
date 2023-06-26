@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <h1>Score Keeping</h1>
+        <form id="myForm" method="POST" action="/gamesetup">
+            <input type="text" id="player1" name="player1" value="{{ player1 }}">
+            <input type="text" id="player2" name="player2" value="{{ player2 }}">
+            <button type="submit">Submit</button>
+        </form>
+            <script>
+                $( function() {
+                    var availableTags = {{ autocompleteData|tojson|safe }};
+
+                    $("#player1, #player2").autocomplete({
+                      source: availableTags,
+                      autoFocus: true
+                    });
+
+                    $('#myForm').on('submit', function(e){
+                        var name1 = $('#player1').val();
+                        var name2 = $('#player2').val();
+
+                        if(!availableTags.includes(name1) || !availableTags.includes(name2)) {
+                            alert('Please enter valid names.');
+                            e.preventDefault();
+                        }
+                    });
+                });
+            </script>
+{% endblock %}

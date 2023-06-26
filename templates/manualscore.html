@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card stats-box">
+                    <div class="card-header">
+                        <h2>{{ player1 }}</h2>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Round Score: {{ tscore1 }}</li>
+                        <li class="list-group-item">Match Score: {{ gscores[0] }}</li>
+                        <li class="list-group-item">Match Average: {{ matchAverages[0] }}</li>
+                        <li class="list-group-item">Game Average: {{ gameAverages[0] }}</li>
+                    </ul>
+                    <div class="card-body">
+                        <canvas id="homeScoreChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-wrapper stats-box">
+                    <div class="toggleDiv" id="myFormDiv">
+                        <form id="myForm" method="POST" action="/manualscore">
+                            <div class="form-group">
+                                <label for="score1">Enter Score:</label>
+                                <input type="number" id="score1" name="score1" class="form-control" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="score2">Enter Score:</label>
+                                <input type="number" id="score2" name="score2" class="form-control" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="closer">Enter number closer:</label>
+                                <input type="number" id="closer" name="closer" class="form-control" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="who">Who got the closer one?</label>
+                                <select id="who" name="who" class="form-control">
+                                    <option value="0">{{ player1 }}</option>
+                                    <option value="1">{{ player2 }}</option>
+                                    <option value="False">No one</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <text><font size = "1"> MatchID:{{ matchid }} GamesID:{{ gameid }}</font></text>
+                        </form>
+                    </div>
+
+                    <div class="toggleDiv" id="myGraphDiv" style="display: none;">
+                        <h4>Number of Closest Darts</h4>
+                        <canvas id="myChart3"></canvas>
+                    </div>
+
+                    <div class="toggleDiv" id="myGraphDiv2" style="display: none;">
+                        <h4>Rounds Won</h4>
+                        <canvas id="myChart4"></canvas>
+                    </div>
+
+                    <button type="button" id="nextButton" class="btn btn-secondary">Next</button>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card stats-box">
+                    <div class="card-header">
+                        <h2>{{ player2 }}</h2>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Round Score: {{ tscore2 }}</li>
+                        <li class="list-group-item">Match Score: {{ gscores[1] }}</li>
+                        <li class="list-group-item">Match Average: {{ matchAverages[1] }}</li>
+                        <li class="list-group-item">Game Average: {{ gameAverages[1] }}</li>
+                    </ul>
+                    <div class="card-body">
+                        <canvas id="awayScoreChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if scores != [] %}
+        <h2>Scores:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>{{ player1 }}</th>
+                    <th>{{ player2 }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for score in scores %}
+                    <tr>
+                        <td>{{ score.1 }}</td> <!-- Display column 2 -->
+                        <td>{{ score.3 }}</td> <!-- Display column 4 -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let home_scores = {{ home_scores | tojson }};
+        let away_scores = {{ away_scores | tojson }};
+        let rounds = {{ rounds | tojson }};
+
+
+        var ctx = document.getElementById('homeScoreChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: rounds,
+                datasets: [{
+                    label: 'Home Scores',
+                    data: home_scores,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10  // Set the maximum y-axis value here
+                    }
+                }
+            }
+        });
+
+        var ctx2 = document.getElementById('awayScoreChart').getContext('2d');
+        var myChart2 = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: rounds,
+                datasets: [{
+                    label: 'Away Scores',
+                    data: away_scores,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10  // Set the maximum y-axis value here
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        // Get the data from Flask
+        var data = {{ pie|tojson }};
+
+        // Create the chart
+        var ctx = document.getElementById('myChart3').getContext('2d');
+        var myChart3 = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: ['{{player1}}', '{{player2}}'],
+            datasets: [{
+              data: data,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.6)', // Color for Data 1
+                'rgba(54, 162, 235, 0.6)'  // Color for Data 2
+              ]
+            }]
+          }
+        });
+      </script>
+        <script>
+        // Get the data from Flask
+        var data2 = {{ betterRound|tojson }};
+
+        // Create the chart
+        var ctx = document.getElementById('myChart4').getContext('2d');
+        var myChart4 = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: ['{{player1}}', '{{player2}}', 'draw'],
+            datasets: [{
+              data: data2,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.6)', // Color for Data 1
+                'rgba(54, 162, 235, 0.6)',  // Color for Data 2
+                'rgba(163,235,54,0.6)'  // Color for Data 2
+              ]
+            }]
+          }
+        });
+      </script>
+        <script>
+            $(document).ready(function(){
+                let divs = $('.toggleDiv');
+                let currentIndex = 0;
+
+                function showCurrentDiv() {
+                    divs.hide().eq(currentIndex).show();
+
+                    if (currentIndex === 1 && myChart3) {
+                        myChart3.destroy();
+                        var ctx = document.getElementById('myChart3').getContext('2d');
+                        myChart3 = new Chart(ctx, {
+                          type: 'pie',
+                          data: {
+                            labels: ['{{player1}}', '{{player2}}'],
+                            datasets: [{
+                              data: data,
+                              backgroundColor: [
+                                'rgba(255, 99, 132, 0.6)',
+                                'rgba(54, 162, 235, 0.6)'
+                              ]
+                            }]
+                          }
+                        });
+                    }
+
+                    if (currentIndex === 2 && myChart4) {  // New condition for the second graph
+                        myChart4.destroy();
+                        var ctx = document.getElementById('myChart4').getContext('2d');
+                        myChart4 = new Chart(ctx, {
+                          type: 'pie',
+                          data: {
+                            labels: ['{{player1}}', '{{player2}}', 'draw'],
+                            datasets: [{
+                              data: data2,
+                              backgroundColor: [
+                                'rgba(255, 99, 132, 0.6)',
+                                'rgba(54, 162, 235, 0.6)',
+                                'rgba(163,235,54,0.6)'
+                              ]
+                            }]
+                          }
+                        });
+                    }
+                }
+
+                $("#nextButton").click(function(){
+                    currentIndex = (currentIndex + 1) % divs.length;
+                    showCurrentDiv();
+                });
+
+                showCurrentDiv();
+            });
+        </script>
+
+</body>
+
+{% endblock %}

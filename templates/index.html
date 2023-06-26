@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container py-5">
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to PopDarts League</h1>
+        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+        <hr class="my-4">
+        <p>Track your stats, matches, and more. Log in to get started.</p>
+        <a class="btn btn-primary btn-lg" href="/login" role="button">Log in</a>
+        <div id="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+</div>
+
+
+
+    <script>
+        const allPlayersData = {{ graph | tojson }};
+        console.log(allPlayersData);
+
+        // Define an array of contrasting colors
+        const colors = [
+            '#FF0000', // Red
+            '#00FF00', // Green
+            '#0000FF', // Blue
+            '#FF00FF', // Magenta
+            '#FFFF00', // Yellow
+            '#00FFFF', // Cyan
+            '#800080', // Purple
+            '#FFA500', // Orange
+            '#008000', // Dark Green
+            '#800000', // Maroon
+        ];
+
+        // Prepare the labels for the x-axis
+        let labels = [];
+        for (let player in allPlayersData) {
+            for (let game of allPlayersData[player]) {
+                if (!labels.includes(game[0])) {
+                    labels.push(game[0]);
+                }
+            }
+        }
+        labels.sort((a, b) => a - b);
+
+        // Prepare the datasets
+        let datasets = [];
+        let colorIndex = 0;
+        for (let player in allPlayersData) {
+            let playerRatings = [];
+            let lastKnownRating = null;
+            for (let i = 0; i < labels.length; i++) {
+                let game = allPlayersData[player].find(game => game[0] === labels[i]);
+                if (game) {
+                    playerRatings[i] = game[1];
+                    lastKnownRating = game[1];
+                } else {
+                    playerRatings[i] = lastKnownRating;
+                }
+            }
+
+            datasets.push({
+                label: player,
+                data: playerRatings,
+                fill: false,
+                borderColor: colors[colorIndex % colors.length], // Use a contrasting color from the array
+                tension: 0.1
+            });
+
+            colorIndex++;
+        }
+
+        var ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+        </script>
+{% endblock %}
