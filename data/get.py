@@ -190,6 +190,7 @@ def countBetterRounds():
     draw =0
     print (session['scores'])
     for x in range (0, len(session['scores'])):
+        print ("x times:", x)
         if session['scores'][x][1] > session['scores'][x][3]:
             p1 += 1
         if session['scores'][x][1] < session['scores'][x][3]:

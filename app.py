@@ -138,7 +138,6 @@ def manualscore():                                                              
     home_scores = [score[0] for score in gdata]
     away_scores = [score[1] for score in gdata]
     rounds = [score[2] for score in gdata]
-    data.get.countBetterRounds()
     return render_template('manualscore.html', scores=session['scores'], player1=player1, player2=player2, matchid = session['matchID'], gameid = session['gameID'], tscore1=tscore1, tscore2=tscore2, gscores = gscores, matchAverages = data.get.matchAverages(session['matchID']), gameAverages = data.get.gameAverages(session['matchID'],session['gameID']), home_scores=home_scores, away_scores=away_scores, rounds=rounds, pie = data.get.closer(session['matchID']), betterRound = data.get.countBetterRounds())
 
 @app.route('/undo', methods=['POST'])
