@@ -128,7 +128,7 @@ def gameRRChange(userID, matchID):
     Query = """SELECT rr_change from "PlayerInGame" where match_id = %s and player_id = %s"""
     data = (matchID, userID)
     cursor.execute(Query, data)
-    result = cursor.fetchone()
+    result = int(cursor.fetchone()[0])
     return result
 
 def matchAverages(matchID):

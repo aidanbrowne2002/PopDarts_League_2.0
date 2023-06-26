@@ -26,7 +26,7 @@ def playerInGame(matchID, playerID, rrchange, score):
     cursor = conn.cursor()
     Query = """UPDATE "PlayerInGame" SET rr_change = '%s', score = '%s' WHERE match_id = '%s' AND player_id = '%s'"""
     print ("Updating rr")
-    data = (rrchange,score, matchID, playerID)
+    data = (int(rrchange),score, matchID, playerID)
     cursor.execute(Query, data)
     conn.commit()
     return
@@ -56,7 +56,7 @@ def changeRR(userID, rrchange):
                             port=credentials.port)
     cursor = conn.cursor()
     Query = """UPDATE "Users" set rating = rating + %s where id = %s;"""
-    data = (rrchange , userID)
+    data = (int(rrchange) , userID)
     cursor.execute(Query, data)
     conn.commit()
     return

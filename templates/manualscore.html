@@ -28,11 +28,11 @@
                         <form id="myForm" method="POST" action="/manualscore">
                             <div class="form-group">
                                 <label for="score1">Enter Score:</label>
-                                <input type="number" id="score1" name="score1" class="form-control" autocomplete="off">
+                                <input type="number" id="score1" name="score1" class="form-control" autocomplete="off" required="required">
                             </div>
                             <div class="form-group">
                                 <label for="score2">Enter Score:</label>
-                                <input type="number" id="score2" name="score2" class="form-control" autocomplete="off">
+                                <input type="number" id="score2" name="score2" class="form-control" autocomplete="off" required="required">
                             </div>
                             <div class="form-group">
                                 <label for="closer">Enter number closer:</label>
@@ -41,9 +41,9 @@
                             <div class="form-group">
                                 <label for="who">Who got the closer one?</label>
                                 <select id="who" name="who" class="form-control">
+                                    <option value="False">No one</option>
                                     <option value="0">{{ player1 }}</option>
                                     <option value="1">{{ player2 }}</option>
-                                    <option value="False">No one</option>
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-primary">Submit</button>
