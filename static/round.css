@@ -28,7 +28,7 @@
 }
 
 .page-frame{
-    background: lightskyblue;
+    /* background: lightskyblue; */
     width: 95%;
     height: 95%;
     margin-left: 3%;
@@ -37,7 +37,7 @@
 }
 
 .video-frame{
-    background-color: blueviolet;
+    /* background-color: blueviolet; */
     width: 46%;
     align-self: flex-start;
     margin: 3% 5% 2% 2%; /*Top, Right, Bottom, Left*/
@@ -49,7 +49,7 @@
 }
 
 .data-frame{
-    background-color: pink;
+    /* background-color: pink; */
     width: 46%;
     height: 10%;
     margin-right: 0;
@@ -61,7 +61,7 @@
 }
 
 .averages{
-    background-color: cadetblue;
+    /* background-color: cadetblue; */
     width: 50%;
     height: 10%;
 }
@@ -86,7 +86,7 @@
 }
 
 .graph{
-    background-color: rgb(143, 220, 20);
+    /* background-color: rgb(143, 220, 20); */
 }
 
 .team {
