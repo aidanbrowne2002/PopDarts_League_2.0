@@ -7,6 +7,7 @@ credentials.py
 # Temporary
 Models_Versions/
 round_image/
+rounds/
 
 #environment
 pyvenv.cfg
