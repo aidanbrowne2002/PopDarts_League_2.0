@@ -1,6 +1,6 @@
 import data.credentials
-import helperFunctions
-from flask import Flask, render_template, session, request, redirect
+import helperFunctions as hf
+from flask import Flask, render_template, session, request, redirect, Response
 import data.get
 import data.add
 import data.remove
@@ -124,11 +124,11 @@ def manualscore():                                                              
             result = 1
             winner = player2
         data.update.gameWinner(session['matchID'], session['gameID'], result)
-        if (helperFunctions.checkWinner(session['matchID']) == "no"):
+        if (hf.checkWinner(session['matchID']) == "no"):
             print("game not won")
-            helperFunctions.newGame(session['matchID'], session['gameID'], result)
+            hf.newGame(session['matchID'], session['gameID'], result)
         else:
-            helperFunctions.finishMatch(session['matchID'], result, (data.get.getIdFromUsername(player1), data.get.getIdFromUsername(player2)),data.get.result(session['matchID'])[0],data.get.result(session['matchID'])[1])
+            hf.finishMatch(session['matchID'], result, (data.get.getIdFromUsername(player1), data.get.getIdFromUsername(player2)),data.get.result(session['matchID'])[0],data.get.result(session['matchID'])[1])
             print("game has been won")
             return redirect('/gamefinish')
         tscore1 = 0
@@ -163,6 +163,64 @@ def graph():
     away_scores = [score[1] for score in gdata]
     rounds = [score[2] for score in gdata]
     return render_template('testgraphs.html', home_scores=home_scores, away_scores=away_scores, rounds=rounds)
+
+# ComputerVision Stuff
+@app.route('/game')
+def game():
+    hf.camera_on()
+    global capture
+    capture = 0
+
+    all_players_data = data.get.graphdata()
+    hf.create_class()
+    last_game, names = data.get.preivous_game()
+    return render_template("game_start.html", autocompleteData=data.get.usernames(),last_game=last_game, last_name=names, all_players_data=all_players_data)
+
+@app.route('/procces',methods=['POST'])
+def processing():
+    if request.method == 'POST':
+        name1,name2 = request.form.get('name1'), request.form.get('name2')
+        session['name1'], session['name2'] = name1, name2
+        if request.form.get('next') == 'Next Round':
+            round_image = hf.last_image()
+            team, closest = hf.logic(round_image)
+            session['team'], session['closest'] = team, closest
+    return redirect('/score_confirm')
+
+@app.route('/rounds',methods=['GET', 'POST'])
+def rounds():
+    if request.method == 'POST':
+        name = (request.form.get('name1'), request.form.get('name2'))
+        if request.form.get('click') == 'End Round': # Capture image
+            global capture
+            capture=1
+
+        elif request.form.get('complete_round') == 'Submit':
+            closest = request.form.get('winning_dart') # For future data capture (also need all down darts)
+            team_blue,team_green = request.form.get('blue_s'), request.form.get('green_s')
+            hf.update_scores(int(team_blue), int(team_green))
+
+            end_match = hf.check_score()
+            if end_match:
+                print(end_match)
+                return redirect('/match')
+
+        p_score = (str(hf.get_team('green')),str(hf.get_team('blue')))
+        p_rounds=(str(hf.get_round('green')),str(hf.get_round('blue')))
+        # Either its from game_start or after image is captured from previous round
+        print(hf.get_team('blue'),hf.get_team('green'))
+        return render_template('rounds.html',player_name=name,player_score=p_score,player_rounds=p_rounds)
+    return render_template('rounds.html') # Should turn this into a some error page
+
+@app.route('/score_confirm',methods=['GET','POST'])
+def score_confirm():
+    name1, name2 = session.get('name1', None), session.get('name2', None)
+    team, closest = session.get('team', None), session.get('closest', None)
+    return render_template('confirm_score.html',player_blue=name1,player_green=name2,teams=team,winner_dart=closest)
+
+@app.route('/video')
+def video():
+    return Response(hf.generate_frames(capture),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run()

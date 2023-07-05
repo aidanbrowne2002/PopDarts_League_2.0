@@ -2,6 +2,9 @@ import data.update
 import psycopg2
 from flask import session
 from data import update, add, get
+# CompVision Stuff
+import cv2, os
+from compVision import helper as hp, warp_img as wImg, round_score as rs, score_class as score
 
 def newGame(matchID, gameID, winner):
     newGameID = data.add.gameSetup(matchID)
@@ -64,3 +67,117 @@ def changerr(player1, p1score, rating1, player2, p2score, rating2):
 
     return (changeinrank1, changeinrank2)
 
+# Computer Vision Score tracker
+def create_class():
+    global scores
+    scores = score.Scores()
+
+def update_scores(b,g):
+    print(b,g)
+    scores.update_scores(b, g)
+
+def get_team(colour):
+    if colour == 'blue':
+        return scores.get_blue()
+    elif colour == 'green':
+        return scores.get_green()
+    else:
+        print('incorrect team')
+
+def get_round(colour):
+    if colour == 'blue':
+        return scores.get_rounds_blue()
+    elif colour == 'green':
+        return scores.get_rounds_green()
+    else:
+        print('incorrect team')
+
+def check_score():
+    if scores.get_blue() >= 11 and scores.get_blue() > scores.get_green(): # game won b
+        scores.update_rounds('blue')
+        scores.reset_scores()
+    elif scores.get_green() >= 11 and scores.get_green() > scores.get_blue(): # game won g
+        scores.update_rounds('green')
+        scores.reset_scores()
+
+    if scores.get_rounds_blue() == 3:
+        #scores.reset_rounds()
+        return 'match won blue'
+    elif scores.get_rounds_green() == 3:
+        #scores.reset_rounds()
+        return 'match won green'
+    return None
+
+# Computer Vision
+def camera_on():
+    camera_found = False
+    global camera
+    for camera_index in range(10):  # Try camera indexes 0 to 9
+        camera = cv2.VideoCapture(camera_index)
+        if camera.isOpened():
+            print('on',camera_index)
+            camera_found = True
+            break
+
+    if not camera_found:
+        print("set 0 - No camera found.")
+
+def camera_off():
+    if 'camera' in globals():
+        camera.release()
+    else:
+        print('No camera on atm')
+
+def generate_frames(capture):
+    while True:
+        success, frame = camera.read()
+        if not success:
+            break
+        if capture:
+            print("PICTURE TAKEN")
+            capture=0
+            p = os.path.sep.join(['compVision/rounds', f"rounds_{get_next_round_number()}.jpg"])
+            cv2.imwrite(p, frame)
+        try:
+            ret, buffer = cv2.imencode('.jpg',frame)
+            frame = buffer.tobytes()
+            yield(b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n') # generates the next frame
+        except Exception as e:
+            pass
+
+def logic(r_image):
+    # wImg.unwarp_img('compVision/round_image') # Toggle
+    labels, boxes, scores = hp.load_model(r_image) # Will need to find a way to get latest image
+    center_darts, labels, boxes, scores = hp.clean_data(labels, boxes, scores)
+    # print(boxes)
+    # print(center_darts)
+    closest, team = rs.dart_system(labels, center_darts)
+    return team, closest
+
+def last_image():
+    files = os.listdir('compVision/rounds')
+    image_files = [file for file in files if file.startswith('rounds_') and file.endswith('.jpg')]
+    sorted_files = sorted(image_files)
+    if sorted_files:
+        last_image = sorted_files[-1]
+        return last_image
+    else:
+        print("No image")
+
+def get_next_round_number():
+    saved_files, temp_files = os.listdir('compVision/all_rounds'), os.listdir('compVision/rounds')
+    if saved_files:
+        round_numbers = get_files(saved_files)
+    else:
+        round_numbers = get_files(temp_files)
+    if round_numbers:
+        return max(round_numbers) + 1
+    return 1
+
+def get_files(dir):
+    round_numbers = []
+    for file in dir:
+        round_number = int(file.split('_')[1].split('.')[0])
+        round_numbers.append(round_number)
+    return round_numbers

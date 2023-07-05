@@ -1,0 +1,80 @@
+.page-frame{
+  /* background: lightskyblue; */
+  width: 95%;
+  height: 95%;
+  margin-top: 2%;
+  margin-left: 3%;
+  margin-right: 3%;
+  display: flex;
+}
+
+.video-frame{
+  /* background-color: blueviolet; */
+  width: 46%;
+  align-self: flex-start;
+  margin-left:   5%;
+  margin-right:  5%;
+  margin-bottom: 2%;
+  margin-top: 3%;
+}
+
+.table-frame {
+  /* background-color: pink; */
+  width: 46%;
+  margin-right: 0;
+  margin-left: auto;
+  margin-top: 0;
+}
+
+.previous-game{
+  margin-left:   5%;
+  margin-right:  5%;
+  margin-bottom: 2%;
+  margin-top: 2%;
+}
+
+.table-game{
+  background-color: #fff;
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.data-graph{
+  
+}
+
+.buttons-tab{
+  display: flex;
+  justify-content: center;
+}
+
+.live-video{
+  width: 100%;
+  height: 100%;
+}
+
+.center-button{
+  /* background: blue; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score {
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.green-tag{
+  color: #28a745;
+}
+.blue-tag{
+  color: #007bff;
+}
+
+.title-tag{
+  font-weight: bold;
+  text-decoration: underline;
+  font-size: 20px;
+}

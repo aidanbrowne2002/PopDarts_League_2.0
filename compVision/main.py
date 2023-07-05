@@ -16,4 +16,3 @@ if __name__ == '__main__':
 # python labelImg.py -- Labeling Software
 # Noted that how I labelled the target as a whole not the top part. Causes issue which popdart is the closes. v2 of the labelled images has target labelled differently
 # Note that (atm with the camera that is fish eyed) the image fish eyed lens hasn't been removed. This affects on games that are really close in the corder of the table
-# Place this main file in app.py!!!!!!!!!!!
