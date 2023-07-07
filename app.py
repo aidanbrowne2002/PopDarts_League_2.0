@@ -7,6 +7,8 @@ import data.remove
 import data.update
 from datetime import datetime
 import psycopg2
+import ast
+
 
 app = Flask(__name__)
 app.secret_key = data.credentials.secretkey
@@ -199,10 +201,12 @@ def rounds():
             capture=1
 
         elif request.form.get('complete_round') == 'Submit':
-            closest, cloesest_points = request.form.get('winning_dart'),request.form.get('cloesest_points') # For future data capture (also need all down darts)
+            closest, closest_points = request.form.get('winning_dart'),request.form.get('closest_points') # For future data capture (also need all down darts)
+            print("ASDASDA",closest_points,type(closest_points))
+            closest_points = ast.literal_eval(closest_points)
             team_blue,team_green = request.form.get('blue_s'), request.form.get('green_s')
             hf.update_scores(int(team_blue), int(team_green))
-            data.add.insertRound(session['gameID'],session['round'],(team_blue,team_green), cloesest_points)
+            data.add.insertRound(session['gameID'],session['round'],(team_blue,team_green), closest_points)
 
             end_match, result = hf.check_score(session['matchID'], session['gameID'])
             if result:
@@ -226,15 +230,16 @@ def processing():
         session['player1'], session['player2'] = player1, player2
         if request.form.get('next') == 'Next Round':
             round_image = hf.last_image()
-            team, closest, closest_points = hf.logic(round_image)
-            session['team_score'],session['cloesest_points'],session['closest'] = team, closest_points, closest
+            team, closest_points, closest = hf.logic(round_image)
+            session['team_score'],session['closest_points'],session['closest'] = team, closest_points, closest
     return redirect('/score_confirm')
 
 @app.route('/score_confirm',methods=['GET','POST'])
 def score_confirm():
     player1, player2 = session.get('player1', None), session.get('player2', None)
-    team, closest = session.get('team', None), session.get('cloesest_points', None)
-    return render_template('confirm_score.html',player_blue=player1,player_green=player2,teams=team,winner_dart=closest,cloesest_points=session['closest'])
+    team, closest = session.get('team', None), session.get('closest_points', None)
+    print("AH ",closest ,session['closest'])
+    return render_template('confirm_score.html',player_blue=player1,player_green=player2,teams=team,winner_dart=closest,closest_points=session['closest'])
 
 @app.route('/video')
 def video():

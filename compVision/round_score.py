@@ -63,11 +63,12 @@ def point_count(labels, center_darts): # Change team when Having UI system ready
         else: # This is when it finds a down dart
             continue
     if closest == 'blue':
-        closest_points = (team['closest'],0)
+        closest_points = [team['closest'],0]
     elif closest == 'green':
-        closest_points = (0,team['closest'])
+        closest_points = [0,team['closest']]
     else:
         print('Dunno man')
+    print(team['closest'])
     return closest, team, all_darts, closest_points
 
 def recalabrate(closest, team):
