@@ -92,21 +92,26 @@ def get_round(colour):
     else:
         print('incorrect team')
 
-def check_score():
+def check_score(matchID, gameID):
+    print(matchID, gameID)
     if scores.get_blue() >= 11 and scores.get_blue() > scores.get_green(): # game won b
+        data.update.gameWinner(matchID, gameID, 0)
         scores.update_rounds('blue')
         scores.reset_scores()
+        gameResult = 0
     elif scores.get_green() >= 11 and scores.get_green() > scores.get_blue(): # game won g
+        data.update.gameWinner(matchID, gameID, 1)
         scores.update_rounds('green')
         scores.reset_scores()
+        gameResult = 1
 
     if scores.get_rounds_blue() == 3:
-        #scores.reset_rounds()
-        return 'match won blue'
+        # scores.reset_rounds()
+        return 'match won blue', gameResult
     elif scores.get_rounds_green() == 3:
-        #scores.reset_rounds()
-        return 'match won green'
-    return None
+        # scores.reset_rounds()
+        return 'match won green', gameResult
+    return None, gameResult
 
 # Computer Vision
 def camera_on():
@@ -152,8 +157,8 @@ def logic(r_image):
     center_darts, labels, boxes, scores = hp.clean_data(labels, boxes, scores)
     # print(boxes)
     # print(center_darts)
-    closest, team = rs.dart_system(labels, center_darts)
-    return team, closest
+    closest, team, closest_points = rs.dart_system(labels, center_darts)
+    return team, closest, closest_points
 
 def last_image():
     files = os.listdir('compVision/rounds')

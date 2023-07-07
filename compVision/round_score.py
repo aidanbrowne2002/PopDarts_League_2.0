@@ -25,8 +25,9 @@ def find_closest(labels, darts):
     return distance
 
 def point_count(labels, center_darts): # Change team when Having UI system ready!!!!! (Proof of concept)
-    team = {'blue'  : 0,
-            'green' : 0}
+    team = {'blue'   : 0,
+            'green'  : 0,
+            'closest': 0}
     index = 0
 
     all_darts = [[labels[i],center_darts[i]] for i in range(len(labels))]
@@ -39,13 +40,16 @@ def point_count(labels, center_darts): # Change team when Having UI system ready
     if no_down_darts[0][0] == 'blueUp':
         team['blue'] += 2
         closest = 'blue'
+        team['closest'] += 1
     elif no_down_darts[0][0] == 'greenUp':
         team['green'] += 2
         closest = 'green'
+        team['closest'] += 1
     # +2 if the same colour is the next closest v
     for dart in no_down_darts[1:]:
         if closest in dart[0]:
             team[closest] += 2
+            team['closest'] += 1
             index +=1
         else:
             index +=1
@@ -58,7 +62,13 @@ def point_count(labels, center_darts): # Change team when Having UI system ready
             team['green'] += 1
         else: # This is when it finds a down dart
             continue
-    return closest, team, all_darts
+    if closest == 'blue':
+        closest_points = (team['closest'],0)
+    elif closest == 'green':
+        closest_points = (0,team['closest'])
+    else:
+        print('Dunno man')
+    return closest, team, all_darts, closest_points
 
 def recalabrate(closest, team):
     print(f"Closest: {closest} \nPoints: {team}")
@@ -79,13 +89,13 @@ def recalabrate(closest, team):
 def dart_system(labels, center_darts):
     distance = find_closest(labels, center_darts)
 
-    closest, dart_score, all_darts = point_count(labels, distance) # all_darts are for future stats
+    closest, dart_score, all_darts, closest_points = point_count(labels, distance) # all_darts are for future stats
 
     # closest, team = recalabrate(closest, dart_score)
     # visualize.show_labeled_image(image, boxes, distance)
     # hp.plot_center(center_darts, image)
 
-    return closest, dart_score
+    return closest, dart_score, closest_points
 # Notes
 """
 

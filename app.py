@@ -168,65 +168,73 @@ def graph():
     return render_template('testgraphs.html', home_scores=home_scores, away_scores=away_scores, rounds=rounds)
 
 # ComputerVision Stuff
-@app.route('/game')
+@app.route('/game', methods=['GET','POST'])
 def game():
-    hf.create_class()
-    hf.camera_on()
     if request.method == 'POST':
-        session['player1'], session['player2'] = request.form.get('player1'), request.form.get('player2')
-        players = [data.get.getIdFromUsername(session['player1']), data.get.getIdFromUsername(session['player2'])]
-        returned = data.add.matchSetup(players)
+        session['player1'] = request.form.get('player1')
+        session['player2'] = request.form.get('player2')
+        players = [data.get.getIdFromUsername(session['player1']), data.get.getIdFromUsername(session['player2'])] # List players
+        returned = data.add.matchSetup(players) # Setup match (id for game and match)
         session['matchID'] = returned[0]
         session['gameID'] = returned[1]
         return redirect('/rounds')
+    hf.camera_on()
+    hf.create_class()
     global capture
     capture = 0
-    # Getting data for table of privous game
-    all_players_data = data.get.graphdata()
-    last_game, names = data.get.preivous_game()
-    return render_template("game_start.html", autocompleteData=data.get.usernames(),last_game=last_game, last_name=names, all_players_data=all_players_data)
 
+    all_players_data = data.get.graphdata()
+    game, names = data.get.preivous_game()
+    return render_template("game_start.html", autocompleteData=data.get.usernames(),last_game=game, last_name=names, all_players_data=all_players_data)
 
 @app.route('/rounds',methods=['GET', 'POST'])
 def rounds():
-    if not session['gameID'] and not session['matchID']:
+    if not session['gameID'] and not session['matchID']: # Need id of game to start
         return redirect('/game')
+    players = (session['player1'],session['player2'])
 
     if request.method == 'POST':
-        players = (request.form.get('player1'), request.form.get('player2'))
-
         if request.form.get('click') == 'End Round': # Capture image
             global capture
             capture=1
 
         elif request.form.get('complete_round') == 'Submit':
-            print("ADD STUFF HERE!")
+            closest, cloesest_points = request.form.get('winning_dart'),request.form.get('cloesest_points') # For future data capture (also need all down darts)
+            team_blue,team_green = request.form.get('blue_s'), request.form.get('green_s')
+            hf.update_scores(int(team_blue), int(team_green))
+            data.add.insertRound(session['gameID'],session['round'],(team_blue,team_green), cloesest_points)
 
-        p_score  = (str(hf.get_team('green')),str(hf.get_team('blue')))
-        p_rounds = (str(hf.get_round('green')),str(hf.get_round('blue')))
-        # Either its from game_start or after image is captured from previous round
-        print(hf.get_team('blue'),hf.get_team('green'))
-        return render_template('rounds.html',player_name=players,player_score=p_score,player_rounds=p_rounds)
-    return render_template('rounds.html') # Should turn this into a some error page
+            end_match, result = hf.check_score(session['matchID'], session['gameID'])
+            if result:
+                print("game not won")
+                hf.newGame(session['matchID'], session['gameID'], result)
+            if end_match:
+                hf.finishMatch(session['matchID'], result, (data.get.getIdFromUsername(players[0]), data.get.getIdFromUsername(players[1])),data.get.result(session['matchID'])[0],data.get.result(session['matchID'])[1])
+                return redirect('/gamefinish')
+
+    p_score  = (str(hf.get_team('blue')),str(hf.get_team('green')))
+    p_rounds = (str(hf.get_round('blue')),str(hf.get_round('green')))
+    # Either its from game_start or after image is captured from previous round
+    print(hf.get_team('blue'),hf.get_team('green'))
+    return render_template('rounds.html',player_name=players,player_score=p_score,player_rounds=p_rounds)
 
 @app.route('/procces',methods=['POST'])
 def processing():
+    session['round'] = data.get.getNextRound(session['matchID'], session['gameID']) # Create round ID
     if request.method == 'POST':
-        session['round'] = data.get.getNextRound(session['matchID'], session['gameID'])
         player1,player2 = request.form.get('player1'), request.form.get('player2')
         session['player1'], session['player2'] = player1, player2
-
         if request.form.get('next') == 'Next Round':
-            round_image = hf.last_image() # This atm isn't the best solution, need to do some sort of ID check
-            team, closest = hf.logic(round_image)
-            session['team'], session['closest'] = team, closest
+            round_image = hf.last_image()
+            team, closest, closest_points = hf.logic(round_image)
+            session['team_score'],session['cloesest_points'],session['closest'] = team, closest_points, closest
     return redirect('/score_confirm')
 
 @app.route('/score_confirm',methods=['GET','POST'])
 def score_confirm():
-    player1,player2 = request.form.get('player1'), request.form.get('player2')
-    team, closest = session.get('team', None), session.get('closest', None)
-    return render_template('confirm_score.html',player_blue=player1,player_green=player2,teams=team,winner_dart=closest)
+    player1, player2 = session.get('player1', None), session.get('player2', None)
+    team, closest = session.get('team', None), session.get('cloesest_points', None)
+    return render_template('confirm_score.html',player_blue=player1,player_green=player2,teams=team,winner_dart=closest,cloesest_points=session['closest'])
 
 @app.route('/video')
 def video():

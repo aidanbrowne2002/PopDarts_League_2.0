@@ -81,7 +81,7 @@
         $( function() {
             var availableTags = {{ autocompleteData|tojson|safe }};
 
-            $("#name1, #name2").autocomplete({
+            $("#player1, #player2").autocomplete({
                 source: availableTags,
                 autoFocus: true
             });
