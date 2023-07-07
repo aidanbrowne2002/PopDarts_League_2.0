@@ -94,6 +94,7 @@ def get_round(colour):
 
 def check_score(matchID, gameID):
     print(matchID, gameID)
+    gameResult = None
     if scores.get_blue() >= 11 and scores.get_blue() > scores.get_green(): # game won b
         data.update.gameWinner(matchID, gameID, 0)
         scores.update_rounds('blue')
