@@ -8,6 +8,7 @@ import data.update
 from datetime import datetime
 import psycopg2
 import ast
+from waitress import serve
 
 
 app = Flask(__name__)
@@ -244,4 +245,4 @@ def video():
     return Response(hf.generate_frames(capture),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
-    app.run()
+    serve(app, host='0.0.0.0', port=5000, threads=2)
