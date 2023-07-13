@@ -213,7 +213,7 @@ def rounds():
     p_rounds = (str(hf.get_round('blue')),str(hf.get_round('green')))
     # Either its from game_start or after image is captured from previous round
     print(hf.get_team('blue'),hf.get_team('green'))
-    return render_template('rounds.html',player_name=players,player_score=p_score,player_rounds=p_rounds)
+    return render_template('visionscore.html',player_name=players,player_score=p_score,player_rounds=p_rounds)
 
 @app.route('/procces',methods=['POST'])
 def processing():

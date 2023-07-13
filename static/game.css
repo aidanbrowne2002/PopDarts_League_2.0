@@ -8,6 +8,13 @@
   display: flex;
 }
 
+.box-frame {
+  background-color: #e9ecef;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.3rem;
+}
+
 .video-frame{
   /* background-color: blueviolet; */
   width: 46%;
