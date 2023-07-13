@@ -8,6 +8,7 @@ credentials.py
 Models_Versions/
 round_image/
 rounds/
+Certificate/
 
 #environment
 pyvenv.cfg

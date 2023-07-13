@@ -40,16 +40,12 @@
   overflow: hidden;
 }
 
-.data-graph{
-  
-}
-
 .buttons-tab{
   display: flex;
   justify-content: center;
 }
 
-.live-video{
+video#live-video{
   width: 100%;
   height: 100%;
 }

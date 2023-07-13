@@ -7,9 +7,9 @@ import data.remove
 import data.update
 from datetime import datetime
 import psycopg2
-import ast
+import os
+import pybase64
 from waitress import serve
-
 
 app = Flask(__name__)
 app.secret_key = data.credentials.secretkey
@@ -181,10 +181,7 @@ def game():
         session['matchID'] = returned[0]
         session['gameID'] = returned[1]
         return redirect('/rounds')
-    hf.camera_on()
     hf.create_class()
-    global capture
-    capture = 0
 
     all_players_data = data.get.graphdata()
     game, names = data.get.preivous_game()
@@ -197,11 +194,7 @@ def rounds():
     players = (session['player1'],session['player2'])
 
     if request.method == 'POST':
-        if request.form.get('click') == 'End Round': # Capture image
-            global capture
-            capture=1
-
-        elif request.form.get('complete_round') == 'Submit':
+        if request.form.get('complete_round') == 'Submit':
             closest = request.form.get('winning_dart') # ,request.form.get('closest_points') # For future data capture (also need all down darts)
             print(session['matchID'], session['gameID'])
             team_blue,team_green = request.form.get('blue_s'), request.form.get('green_s')
@@ -228,21 +221,35 @@ def processing():
     if request.method == 'POST':
         player1,player2 = request.form.get('player1'), request.form.get('player2')
         session['player1'], session['player2'] = player1, player2
-        if request.form.get('next') == 'Next Round':
-            round_image = hf.last_image()
-            team, closest_points, closest = hf.logic(round_image)
-            session['team_score'],session['closest_points'],session['closest'] = team, closest_points, closest
-    return redirect('/score_confirm')
+
+        round_image = request.form.get('captured_image')
+
+        counter = 1
+        while True:
+            image = f'image_{counter}.jpg'
+            if os.path.exists('compVision/round_image/'+image):
+                counter += 1
+            else:
+                round_image = round_image.split(",")[1]
+                round_image += "=" * ((4 - len(round_image) % 4) % 4)  # ugh
+                with open(f'compVision/round_image/{image}', 'wb') as fh:
+                    fh.write(pybase64.b64decode(round_image))
+                    break
+
+        round_image = hf.last_image()
+        team, closest_points, closest = hf.logic(round_image)
+        session['team_score'],session['closest_points'],session['closest'] = team, closest_points, closest
+        print(session['closest_points'])
+
+        return redirect('/score_confirm')
+    print('Na Da')
 
 @app.route('/score_confirm',methods=['GET','POST'])
 def score_confirm():
-    player1, player2 = session.get('player1', None), session.get('player2', None)
-    team, closest = session.get('team', None), session.get('closest_points', None)
-    return render_template('confirm_score.html',player_blue=player1,player_green=player2,teams=team,winner_dart=closest,closest_points=session['closest'])
-
-@app.route('/video')
-def video():
-    return Response(hf.generate_frames(capture),mimetype='multipart/x-mixed-replace; boundary=frame')
+    player1, player2 = session['player1'], session['player2']
+    team, closest = session['team_score'], session['closest_points']
+    return render_template('confirm_score.html',player_blue=player1,player_green=player2,team_scores=team,winner_dart=closest,closest_points=session['closest'])
 
 if __name__ == '__main__':
-    serve(app, host='0.0.0.0', port=5000, threads=2)
+    # app.run(host='192.168.0.161', port=8080, debug=True, ssl_context=('Certificate/cert.pem','Certificate/key.pem'))
+    serve(app, host='0.0.0.0', port=8080)

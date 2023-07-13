@@ -3,10 +3,11 @@ from detecto import core, utils
 from torch import stack
 
 def load_model(image):
+    image = 'image_3.jpg'
     # Load
     model = core.Model.load('compVision/Models_Versions/Test_ModelV2.pth', ['greenUp','blueUp','down','target'])
     # Test Image
-    image = utils.read_image(f'compVision/rounds/{image}')
+    image = utils.read_image(f'compVision/round_image/{image}')
     # Prediction
     predictions = model.predict(image)
     # predictions format

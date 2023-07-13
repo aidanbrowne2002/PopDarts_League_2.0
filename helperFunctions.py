@@ -115,43 +115,6 @@ def check_score(matchID, gameID):
     return None, gameResult
 
 # Computer Vision
-def camera_on():
-    camera_found = False
-    global camera
-    for camera_index in range(10):  # Try camera indexes 0 to 9
-        camera = cv2.VideoCapture(camera_index)
-        if camera.isOpened():
-            print('on',camera_index)
-            camera_found = True
-            break
-
-    if not camera_found:
-        print("set 0 - No camera found.")
-
-def camera_off():
-    if 'camera' in globals():
-        camera.release()
-    else:
-        print('No camera on atm')
-
-def generate_frames(capture):
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-        if capture:
-            print("PICTURE TAKEN")
-            capture=0
-            p = os.path.sep.join(['compVision/rounds', f"rounds_{get_next_round_number()}.jpg"])
-            cv2.imwrite(p, frame)
-        try:
-            ret, buffer = cv2.imencode('.jpg',frame)
-            frame = buffer.tobytes()
-            yield(b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n') # generates the next frame
-        except Exception as e:
-            pass
-
 def logic(r_image):
     # wImg.unwarp_img('compVision/round_image') # Toggle
     labels, boxes, scores = hp.load_model(r_image) # Will need to find a way to get latest image
@@ -162,8 +125,8 @@ def logic(r_image):
     return team, closest, closest_points
 
 def last_image():
-    files = os.listdir('compVision/rounds')
-    image_files = [file for file in files if file.startswith('rounds_') and file.endswith('.jpg')]
+    files = os.listdir('compVision/all_rounds')
+    image_files = [file for file in files if file.startswith('image_') and file.endswith('.jpg')]
     sorted_files = sorted(image_files)
     if sorted_files:
         last_image = sorted_files[-1]
@@ -172,7 +135,7 @@ def last_image():
         print("No image")
 
 def get_next_round_number():
-    saved_files, temp_files = os.listdir('compVision/all_rounds'), os.listdir('compVision/rounds')
+    saved_files, temp_files = os.listdir('compVision/all_rounds'), os.listdir('compVision/all_rounds')
     if saved_files:
         round_numbers = get_files(saved_files)
     else:

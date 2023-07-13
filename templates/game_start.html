@@ -13,7 +13,7 @@
     <body>
         <div class="page-frame">
             <div class="video-frame">
-                <img src="{{url_for('video')}}" class="live-video">
+                <video autoplay="true" id="live-video"></video>
                 <!-- <br> -->
                 <div class="center-button">
                     <form id="player_game" action = "/game" method="POST">
@@ -78,6 +78,19 @@
         </div>
     </body>
     <script>
+        let video = document.querySelector("#live-video")
+        if (navigator.mediaDevices.getUserMedia){
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream){
+                    video.srcObject = stream;
+                })
+                .catch (function (error){
+                    console.log("AH Ay!")
+                })
+        } else{
+            console.log("getUsermedia not supported!");
+        }
+
         $( function() {
             var availableTags = {{ autocompleteData|tojson|safe }};
 
