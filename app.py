@@ -1,4 +1,5 @@
 import data.credentials
+import helperFunctions
 import helperFunctions as hf
 from flask import Flask, render_template, session, request, redirect, Response
 import data.get
@@ -16,7 +17,7 @@ app.secret_key = data.credentials.secretkey
 
 @app.route('/')
 def home():  # put application's code here
-    return render_template('index.html', graph = data.get.graphdata())
+    return render_template('index.html', graph = data.get.graphdata(), table = data.get.table(), now = helperFunctions.tStamp())
 
 
 import psycopg2

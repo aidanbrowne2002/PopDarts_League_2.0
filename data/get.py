@@ -224,3 +224,16 @@ def preivous_game():
     name_data = cursor.fetchall()
     name_data = [list(item) for item in name_data]
     return game_data, name_data
+
+def table():
+    conn = psycopg2.connect(database=credentials.database,
+                            host=credentials.host,
+                            user=credentials.user,
+                            password=credentials.password,
+                            port=credentials.port)
+    cursor = conn.cursor()
+    Query = """SELECT f_name, rating FROM "Users" ORDER BY rating desc"""
+    cursor.execute(Query)
+    return cursor.fetchall()
+    conn.commit()
+    conn.close()

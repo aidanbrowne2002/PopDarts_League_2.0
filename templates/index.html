@@ -4,8 +4,8 @@
 
 <div class="container py-5">
     <div class="jumbotron">
-        <h1 class="display-4">Welcome to PopDarts League</h1>
-        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+        <h1 class="display-4">Welcome to  the global PopDarts League</h1>
+        <p class="lead">The leading global league for the PopDarts community</p>
         <hr class="my-4">
         <p>Track your stats, matches, and more. Log in to get started.</p>
         <a class="btn btn-primary btn-lg" href="/login" role="button">Log in</a>
@@ -13,6 +13,25 @@
             <canvas id="myChart"></canvas>
         </div>
     </div>
+        <section class="table-section">
+                        <h3>Current table as of: <br> {{ now }}</h3>
+                        <table class="league-table">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Rating</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in table %}
+                                    <tr>
+                                        <td>{{row[0]}}</td>
+                                        <td class="centered">{{row[1]}}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </section>
 </div>
 
 
