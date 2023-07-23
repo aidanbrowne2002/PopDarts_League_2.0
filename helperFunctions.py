@@ -189,7 +189,7 @@ def get_files(dir):
     return round_numbers
 
 def convertimage(data):
-    import pybase64
+    #import pybase64
     data += "=" * ((4 - len(data) % 4) % 4)  # ugh
     with open("footon.png", "wb") as f:
         f.write(pybase64.b64decode(data))
