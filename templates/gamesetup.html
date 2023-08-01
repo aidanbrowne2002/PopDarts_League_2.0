@@ -6,7 +6,9 @@
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <h1>Score Keeping</h1>
         <form id="myForm" method="POST" action="/gamesetup">
+            <label for="player1">Player 1 Username</label>
             <input type="text" id="player1" name="player1" value="{{ player1 }}">
+            <label for="player2">Player 2 Username</label>
             <input type="text" id="player2" name="player2" value="{{ player2 }}">
             <button type="submit">Submit</button>
         </form>
